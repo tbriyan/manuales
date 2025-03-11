@@ -1,4 +1,4 @@
-Configuración de Pantalla en Kubuntu
+# Configuración de Pantalla en Kubuntu
 
 Si la resolución de tu laptop se ve muy pequeña y al conectar un monitor externo los elementos se ven demasiado grandes, puedes configurar la escala de la pantalla correctamente para que se conserve incluso después de reiniciar el sistema.
 
