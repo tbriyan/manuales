@@ -1,107 +1,125 @@
-# Configuración de Pantalla en Kubuntu
+# Instalación y Configuración de Wayland en Kubuntu
 
-Si la resolución de tu laptop se ve muy pequeña y al conectar un monitor externo los elementos se ven demasiado grandes, puedes configurar la escala de la pantalla correctamente para que se conserve incluso después de reiniciar el sistema.
+Wayland maneja el escalado de pantallas de forma más eficiente que X11 en KDE Plasma. Sigue estos pasos para instalar y configurarlo en Kubuntu.
 
-1️⃣ Ajustar Escalado en KDE Plasma
+---
 
-Abre Preferencias del sistema.
+## 1️⃣ Verificar si Wayland está instalado
+Ejecuta en la terminal:
+```bash
+echo $XDG_SESSION_TYPE
+```
+- Si responde `wayland`, ya lo estás usando.
+- Si responde `x11`, aún estás en X11.
 
-Ve a Pantalla y monitor → Escalado de pantalla.
+También puedes revisar si en la pantalla de inicio de sesión aparece la opción **Plasma (Wayland)**.
 
-Ajusta el porcentaje de escalado según sea necesario (por ejemplo, 125% o 150%).
+---
 
-Aplica los cambios y cierra sesión para que surta efecto.
+## 2️⃣ Instalar Wayland en Kubuntu
+Si no está instalado, usa:
+```bash
+sudo apt update && sudo apt install plasma-workspace-wayland
+```
+Esto instalará los paquetes necesarios para usar Wayland con KDE Plasma.
 
-Si esto no se aplica correctamente tras reiniciar, prueba con la configuración manual a través de la terminal.
+---
 
-2️⃣ Configurar Escalado con xrandr (X11)
+## 3️⃣ Reiniciar e Iniciar Sesión en Wayland
+1. Cierra sesión en Kubuntu.
+2. En la pantalla de inicio de sesión, selecciona **Plasma (Wayland)**.
+3. Inicia sesión.
 
-Si estás en X11 y la interfaz gráfica no guarda la configuración:
+---
 
-xrandr --output eDP-1 --scale 1.25x1.25
+## 4️⃣ Ajustar Escalado en Wayland
+Ve a **Configuración del Sistema → Pantallas** y ajusta el escalado para cada monitor. Aplica los cambios y verifica que se conserven tras reiniciar.
 
-Reemplaza eDP-1 con el identificador correcto de tu pantalla. Para verificarlo, usa:
+---
 
-xrandr | grep " connected"
+## 5️⃣ Verificar que Wayland está corriendo
+Ejecuta nuevamente:
+```bash
+echo $XDG_SESSION_TYPE
+```
+Debe devolver `wayland`.
 
-Para hacer que este cambio se aplique al iniciar sesión, agrega el comando a ~/.xprofile o ~/.xinitrc.
+---
 
-3️⃣ Configurar Escalado en Wayland
+## 6️⃣ Solución de Problemas
+Si no puedes iniciar sesión en Wayland, instala paquetes adicionales:
+```bash
+sudo apt install plasma-workspace-wayland kwin-wayland-backend-drm
+```
+Luego reinicia e intenta iniciar sesión en **Plasma (Wayland)** nuevamente.
 
-Si decides usar Wayland, el escalado se maneja diferente:
-
-Abre Preferencias del sistema.
-
-Ve a Pantalla y monitor → Escalado de pantalla.
-
-Ajusta la escala y aplica los cambios.
-
-Si aún tienes problemas con aplicaciones que no respetan el escalado, puedes usar la variable de entorno:
-
-export QT_SCALE_FACTOR=1.25
-export GDK_SCALE=1.25
-
-Añádelo a ~/.profile para que se aplique en cada inicio de sesión.
-
-Soluciones para Problemas en Wayland en Kubuntu
-
-Algunas aplicaciones pueden tener problemas en Wayland, especialmente aquellas que dependen de X11 para su renderizado (como algunas aplicaciones antiguas o ciertos programas propietarios). Si decides probar Wayland pero encuentras que algunas aplicaciones no funcionan bien, aquí hay soluciones alternativas para evitar problemas:
-
-1️⃣ Ejecutar Aplicaciones en X11 Dentro de Wayland
-
-Si una aplicación no funciona bien en Wayland, puedes forzarla a ejecutarse en X11 (XWayland) con este comando:
-
+Si algunas aplicaciones no funcionan bien en Wayland, puedes ejecutarlas en X11 temporalmente:
+```bash
 QT_QPA_PLATFORM=xcb nombre-del-programa
-
+```
 Ejemplo:
-
+```bash
 QT_QPA_PLATFORM=xcb firefox
+```
 
-Esto hará que Firefox se ejecute usando XWayland, solucionando problemas gráficos en algunas configuraciones.
+---
 
-2️⃣ Usar Variable Global para Todas las Aplicaciones Qt
+# Mejorando la Compatibilidad con Wayland
 
-Si muchas aplicaciones Qt tienen problemas, puedes hacer que todas se ejecuten en XWayland agregando esto en tu archivo ~/.profile:
+Si encuentras problemas con algunas aplicaciones, aquí hay soluciones alternativas.
 
+## 1️⃣ Ejecutar Aplicaciones en X11 Dentro de Wayland
+Para aplicaciones problemáticas, usa:
+```bash
+QT_QPA_PLATFORM=xcb nombre-del-programa
+```
+Ejemplo:
+```bash
+QT_QPA_PLATFORM=xcb firefox
+```
+
+## 2️⃣ Configurar Qt para Ejecutarse en XWayland
+Si muchas aplicaciones Qt tienen problemas, edita `~/.profile` y agrega:
+```bash
 export QT_QPA_PLATFORM=xcb
-
+```
 Luego, reinicia sesión para aplicar los cambios.
 
-3️⃣ Usar PipeWire para Compartir Pantalla en Wayland
-
-Si usas Zoom, Discord o Google Meet y no funciona la compartición de pantalla, instala PipeWire con:
-
+## 3️⃣ Compartir Pantalla en Wayland con PipeWire
+Si Zoom, Discord o Google Meet no funcionan, instala PipeWire:
+```bash
 sudo apt install pipewire wireplumber xdg-desktop-portal xdg-desktop-portal-kde
-
+```
 Luego reinicia el sistema.
 
-4️⃣ Comprobar Soporte de Aplicaciones
+## 4️⃣ Optimizar Soporte de Aplicaciones
+- **Firefox y Chrome**: Habilita `MOZ_ENABLE_WAYLAND=1` para mejor rendimiento en Wayland.
+- **Apps Electron (VS Code, Slack, Discord, etc.)**: Usa:
+  ```bash
+  --enable-features=UseOzonePlatform --ozone-platform=wayland
+  ```
 
-Algunas apps pueden necesitar ajustes adicionales:
+## 5️⃣ Volver a X11 si Wayland No Funciona Bien
+Si experimentas demasiados problemas, puedes volver a X11:
+1. Cierra sesión.
+2. En la pantalla de inicio de sesión, selecciona **Plasma (X11)**.
+3. Inicia sesión.
 
-Firefox y Chrome → Habilita MOZ_ENABLE_WAYLAND=1 para mejor rendimiento en Wayland.
-
-Electron apps (VS Code, Slack, Discord, etc.) → A veces tienen errores con Wayland, pero suelen funcionar bien con --enable-features=UseOzonePlatform --ozone-platform=wayland.
-
-5️⃣ Si Nada Funciona Bien, Volver a X11
-
-Si después de probar Wayland ves que muchas aplicaciones tienen problemas, puedes volver a X11 desde la pantalla de inicio de sesión:
-
-Cierra sesión.
-
-En la pantalla de inicio de sesión, selecciona Plasma (X11) en lugar de Plasma (Wayland).
-
-Inicia sesión y verás que vuelves a usar X11.
-
-Si deseas hacer X11 el predeterminado, ejecuta:
-
+Para hacer X11 el predeterminado, ejecuta:
+```bash
 sudo update-alternatives --config x-session-manager
+```
+Y selecciona la opción de **Plasma (X11)**.
 
-Y selecciona la opción de Plasma (X11).
+---
 
-Resumen
+## 📌 Resumen
+✅ Instalamos Wayland en Kubuntu.  
+✅ Cambiamos la sesión de KDE a Plasma (Wayland).  
+✅ Configuramos el escalado de forma nativa.  
+✅ Solucionamos problemas de compatibilidad.  
+✅ PipeWire ayuda a compartir pantalla.  
+✅ Se puede volver a X11 si es necesario.  
 
-✅ Puedes ejecutar apps en X11 dentro de Wayland si tienen problemas.✅ Algunas apps pueden necesitar configuraciones extra.✅ PipeWire soluciona problemas de compartir pantalla.✅ Si Wayland no funciona bien, puedes volver a X11 fácilmente.
-
-Prueba y ajusta según tus necesidades. 🚀
+Wayland mejora el escalado en pantallas de alta resolución y múltiples monitores. ¡Pruébalo y ajusta según sea necesario! 🚀
 
